@@ -51,14 +51,14 @@ export async function login(
       .where(eq(user.email, email));
     if (!userRecord) return { success: false, message: "User not found." };
 
-    const { response, headers: responseHeaders } = await auth.api.signInEmail({
+    const { headers: responseHeaders } = await auth.api.signInEmail({
+      returnHeaders: true,
       body: {
         email: validatedEmail,
         password: validatedPassword,
         rememberMe: true,
       },
       headers,
-      asResponse: true,
     });
 
     const setCookieHeader = responseHeaders.get("set-cookie");
@@ -146,7 +146,8 @@ export async function signup(
     password: validatedPassword,
   } = validateFields.data;
   try {
-    const { response, headers: responseHeaders } = await auth.api.signUpEmail({
+    const { headers: responseHeaders } = await auth.api.signUpEmail({
+      returnHeaders: true,
       body: {
         name: validatedName,
         email: validatedEmail,
@@ -154,10 +155,14 @@ export async function signup(
         rememberMe: true,
       },
       headers,
-      asResponse: true,
     });
 
     const setCookieHeader = responseHeaders.get("set-cookie");
+    await auth.api.sendVerificationEmail({
+      body: {
+        email: validatedEmail,
+      },
+    });
     return {
       success: true,
       message: "Signed up successfully.",
@@ -213,23 +218,23 @@ export async function signout(
 export async function getUserSession(
   headers: ReturnType<typeof fromNodeHeaders>
 ): Promise<{ success: boolean; session: SessionType | null }> {
-  console.log("1. Starting getUserSession in service layer.");
-  console.log("cookie from header in service: ", headers);
+  // console.log("1. Starting getUserSession in service layer.");
+  // console.log("cookie from header in service: ", headers);
   const session = await auth.api.getSession({
     headers,
   });
-  console.log("2. Result from getSession:", session ? "Found" : "Not Found");
+  // console.log("2. Result from getSession:", session ? "Found" : "Not Found");
   if (!session) {
     return {
       success: false,
       session: null,
     };
   }
-  console.log("3. Starting DB query for user record.");
+  // console.log("3. Starting DB query for user record.");
   const userRecord = await db.query.user.findFirst({
     where: (fields, { eq }) => eq(fields.id, session.user.id),
   });
-  console.log("4. Result from DB query:", userRecord ? "Found" : "Not Found");
+  // console.log("4. Result from DB query:", userRecord ? "Found" : "Not Found");
   if (!userRecord) {
     return {
       success: false,

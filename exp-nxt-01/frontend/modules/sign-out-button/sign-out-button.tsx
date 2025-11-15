@@ -31,7 +31,7 @@ export function SignoutButton() {
       router.push(res.redirectTo as string);
       reset();
     },
-    onError: (err: Error) => {
+    onError: () => {
       toast.error("Something went wrong.");
       reset();
     },
