@@ -14,7 +14,35 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
-    // requireEmailVerification: true,
+    resetPasswordTokenExpiresIn: 600,
+    sendResetPassword: async ({ user, url, token }, request) => {
+      const customResetPasswordUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+      await sendEmail({
+        to: user.email,
+        subject: "Reset password request",
+        text: `
+You request a password reset.    
+    To reset your password, please click the link below:
+    ${customResetPasswordUrl}    
+    If you did not request this, please ignore this email.
+  `,
+        html: `
+    <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ccc; max-width: 600px; margin: auto;">
+        <h2 style="color: #333;">Welcome to Our App!</h2>
+        <p>Here's the reset password link. Please click the button below to reset your password and get back at where you left from:</p>
+        
+        <a href=${customResetPasswordUrl}
+           style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+            Reset Password
+        </a>
+        
+        <p style="margin-top: 30px; font-size: 12px; color: #777;">
+            If you did not request this, please disregard this email.
+        </p>
+    </div>
+  `,
+      });
+    },
   },
   emailVerification: {
     autoSignInAfterVerification: true,
