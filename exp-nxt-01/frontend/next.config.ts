@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
   experimental: {
     typedEnv: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "swd3umhwh1.ufs.sh",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

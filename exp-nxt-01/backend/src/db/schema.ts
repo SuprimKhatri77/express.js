@@ -1,4 +1,9 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import {
+  relations,
+  type InferInsertModel,
+  type InferSelectModel,
+} from "drizzle-orm";
+import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -59,3 +64,33 @@ export const verification = pgTable("verification", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+export const blogs = pgTable("blogs", {
+  id: uuid().defaultRandom().primaryKey().notNull(),
+  title: text("title").notNull(),
+  slug: text("slug").unique().notNull(),
+  content: text("content").notNull(),
+  authorId: text("author_id").references(() => user.id, {
+    onDelete: "cascade",
+  }),
+  thumbnailUrl: text("thumbnail_url"),
+  tags: text("tags").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const blogsRelations = relations(blogs, ({ one }) => ({
+  user: one(user, {
+    fields: [blogs.authorId],
+    references: [user.id],
+  }),
+}));
+
+export const userRelations = relations(user, ({ many }) => ({
+  blogs: many(blogs),
+}));
+
+export type BlogSelectType = InferSelectModel<typeof blogs>;
+export type BlogInsertType = InferInsertModel<typeof blogs>;

@@ -1,5 +1,3 @@
-import type { BetterAuthCookies } from "better-auth";
-
 export type LoginResponse = {
   errors?: {
     properties?: {

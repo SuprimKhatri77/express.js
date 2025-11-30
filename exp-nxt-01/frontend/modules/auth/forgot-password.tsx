@@ -37,6 +37,7 @@ export default function ForgetPassword() {
         toast.error(res.message);
         return;
       }
+      setEmail("");
       toast.success(res.message);
     },
     onError: () => {
